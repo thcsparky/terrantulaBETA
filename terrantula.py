@@ -72,7 +72,7 @@ def processCMD(cmd):
                 outstr += url + '\n'
             ou.write(outstr)
             ou.close()
-            print('saved to: ' + os.getcwd() + '/crawled.txt'
+            print('saved to: ' + os.getcwd() + '/crawled.txt')
         except:
             print('empty set')
 
@@ -157,10 +157,14 @@ def processCMD(cmd):
             print(e)
 
     if cmd == 'show settings':
-        print('max crawl depth: ' + str(settings['maxc']))
-        print('max download depth: ' + str(settings['maxdl']))
-        print('other settings: \n')
-        print(settings)
+        try:
+            print('max crawl depth: ' + str(settings['maxc']))
+            print('max download depth: ' + str(settings['maxdl']))
+        except:
+            print('max crawl depth or max dl depth not set')
+        finally:
+            print('other settings: \n')
+            print(settings)
 
     if cmd.find('set url ') > -1:
         urly = cmd.split('set url')[1]
