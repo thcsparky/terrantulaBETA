@@ -28,7 +28,9 @@ def processCMD(cmd):
         print('set url (this will be the beginning, starting url)')
         print('set prefix [here] (this is what the program will look for links to the right of)')
         print('set suffix [here] (this is what the program will look for links to the left of up until the prefix)')
-        print('set path proxies [here] (this will assume the link to a text file in this directory where proxies are stored, empty means no proxies)')
+        print('load proxies (stored in this directory)')
+        print('list proxies')
+        print('clear proxies')
         print('add dontscrape [here] (adds an item where the program wont scrape or dl if url is containing one of these strings)')
         print('list dontscrape (shows items of dontscrape in an enumerated list)')
         print('rem dontscrape [here] (removes one of the items based on its text)')
@@ -50,8 +52,33 @@ def processCMD(cmd):
         print('back')
         print('exit')
 
+    if cmd.find('list proxies') > -1:
+        try:
+            for x in settigns['proxies']:
+                print(x)
+        except Exception as e:
+            print('None loaded! errmsg(: ' + str(e) + ')')
 
-    if cmd.find('save cralwed') > -1:
+    if cmd.find('load proxies') > -1:
+        try:
+            pinp = input(os.getcwd + '/').rstrip()
+            ppath = os.getcwd() + '/' + pinp
+            a = open(ppath)
+            prx = a.read()
+            a.close()
+            settings['proxies'] = []
+            for prx2 in prx:
+                settings['proxies'].append(prx2)
+        except Exception as e:
+            print(e)
+
+    if cmd.find('clear proxies') > -1:
+        try:
+            settings['proxies'] = []
+        except Exception as e:
+            print(e)
+
+    if cmd.find('save crawled') > -1:
         tpath = os.getcwd() + '/crawled.txt'
         try:
             ou = open(tpath)
@@ -240,6 +267,9 @@ def processCMD(cmd):
             print(prob)
 
     if cmd.find('action start') > -1:
+        if 'proxies' not in settings:
+            settings['proxies'] = []
+
         print('commencing program!\n')
         yetToCrawl.append(settings['url'])
         rcrawl()
@@ -296,7 +326,21 @@ def rcrawl():
         ##get
         print('grabbing page: ' + urlcrawl)
         try:
-            req = requests.get(urlcrawl, timeout=30)
+            #use a proxy:
+            if 'proxies' in settings:
+                if len(settings['proxies']) > 0: ##has to be inside separate if statement or it will crash with key error
+                    prxmax = len(settings['proxies'])
+                    prxint = random.randrange(0, prxmax)
+                    prx = settings['proxies'][prxint]
+                    prxdict = {'http': prx, 'https': prx}
+                    req = requests.get(urlcrawl, timeout=30, proxies=prxdict)
+            else:
+                settings['proxies'] = []##defeat the error
+            ##now check if non proxy:
+            if len(settings['proxies']) == 0:
+                req = requests.get(urlcrawl, timeout=30)
+
+            ##add item to crawled.
             crawled.append(urlcrawl)
         except Exception as e:
             print('Error Retrieving, at: req.get(urlcrawl)\n Code: ' + str(e))
@@ -340,12 +384,30 @@ def dlfile(url, localname):
     dlspath = os.getcwd() + '/downloads/'
     outpath = dlspath + localname
     try:
-        with requests.get(url, stream=True) as r:
-            r.raise_for_status()
-            with open(dlspath + localname, 'wb') as f:
-                for piece in r.iter_content(chunk_size=8192):
-                    f.write(piece)
-        return('saved to: ' + outpath)
+        ##use proxies
+        prx = ''
+        if 'proxies' in settings:
+            if len(settings['proxies']) > 0:
+                prxint = random.randrange(0, len(settings['proxies']))
+                prx = settings['proxies'][prxint]
+
+        if prx == '':
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                with open(dlspath + localname, 'wb') as f:
+                    for piece in r.iter_content(chunk_size=8192):
+                        f.write(piece)
+            return('saved to: ' + outpath)
+
+        if prx != '':
+            prxdict = {'http': prx, 'https': prx}
+            with requests.get(url, stream=True, proxies=prxdict) as r:
+                r.raise_for_status()
+                with open(dlspath + localname, 'wb') as f:
+                    for piece in r.iter_content(chunk_size=8192):
+                        f.write(piece)
+            return('saved to: ' + outpath)
+
     except Exception as e:
         print(e)
 
