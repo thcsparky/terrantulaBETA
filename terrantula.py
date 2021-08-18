@@ -102,15 +102,17 @@ def processCMD(cmd):
             try:
                 settings['extcrawl'].remove(sub2cmd)
                 print('Removed: ' + sub2cmd)
-            except:
+            except Exception as e:
+                print(e)
                 settings['extcrawl'] = []
 
         if subcmd.find('dl ') > -1:
-            sub2cmd = subcmd.split('dl')[1]
+            sub2cmd = subcmd.split('dl ')[1]
             try:
                 settings['crawldl'].remove(sub2cmd)
                 print('Removed: ' + sub2cmd)
-            except:
+            except Exception as e:
+                print(e)
                 settings['crawldl'] = []
 
     if cmd.find('list ext ') > -1:

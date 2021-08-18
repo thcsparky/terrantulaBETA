@@ -1,1 +1,1 @@
-{"url": "https://aol.com/", "parsers": {"prefix": "\"", "suffix": "\""}, "dontscrape": ["google,com", ".gov"], "extcrawl": [".html", ".php", "/", ".htm", ".htm"], "crawldl": [".svg", ".js"], "maxdl": 25, "maxc": 90, "linkstart": "http", "recorddl": "off", "recordcrawl": "off"}
+{"url": "https://aol.com/", "parsers": {"prefix": "\"", "suffix": "\""}, "dontscrape": ["google,com", ".gov"], "extcrawl": [".html", ".php", "/", ".htm", ".htm"], "crawldl": [".svg"], "maxdl": 25, "maxc": 90, "linkstart": "http", "recorddl": "off", "recordcrawl": "off"}
