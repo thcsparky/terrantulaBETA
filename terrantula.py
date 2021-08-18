@@ -256,6 +256,9 @@ def rcrawl():
     global maxdl
     global pos
     global dlpos
+    ##print a nice little message when the list is exhaustive.
+    if len(yetToDl) <= 0 and len(yetToCrawl) <= 0:
+        print('Nothing left to crawl or DL. done.')
 
     ##this one is going to prioritize downloads
     ##check if downloads yet to process:
@@ -294,7 +297,7 @@ def rcrawl():
             req = requests.get(urlcrawl, timeout=30)
             crawled.append(urlcrawl)
         except Exception as e:
-            print('Error Retrieving. Code: ' + str(e))
+            print('Error Retrieving, at: req.get(urlcrawl)\n Code: ' + str(e))
             rcrawl()
             return
 
