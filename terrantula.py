@@ -271,6 +271,8 @@ def processCMD(cmd):
             settings['proxies'] = []
 
         print('commencing program!\n')
+        yetToDl.clear()
+        yetToCrawl.clear()
         yetToCrawl.append(settings['url'])
         rcrawl()
 
