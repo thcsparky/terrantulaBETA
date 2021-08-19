@@ -44,6 +44,9 @@ def processCMD(cmd):
         print('show settings (shows all the settings')
         print('load settings')
         print('save settings')
+        print('add mustfind (here) this is a list of strings that must be contained in the url in order to process it, you can add * for everything')
+        print('rem mustfind (here)')
+        print('show mustfind')
         print('add ext (crawl or dl) .exmpl')
         print('rem ext (crawl or dl) here (removes item based on the file extension rather than a number like the other one)')
         print('list ext (crawl or dl) lists ')
@@ -58,6 +61,26 @@ def processCMD(cmd):
                 print(x)
         except Exception as e:
             print('None loaded! errmsg(: ' + str(e) + ')')
+    if cmd.find('add mustfind ') > -1:
+        mst = cmd.split('add mustfind ')[1]
+        try:
+            settings['mustfind'].append(mst)
+            print('added item: ' + mst)
+        except:
+            settings['mustfind'] = [mst]
+
+    if cmd.find('rem mustfind ') > -1:
+        mst = cmd.split('rem mustfind ')[1]
+        try:
+            settings['mustfind'].remove(mst)
+        except Exception as e:
+            print(e)
+
+    if cmd.find('show mustfind') > -1:
+        try:
+            print(settings['mustfind'])
+        except Exception as e:
+            print(e)
 
     if cmd.find('load proxies') > -1:
         try:
@@ -290,6 +313,7 @@ def rcrawl():
     global maxdl
     global pos
     global dlpos
+
     ##print a nice little message when the list is exhaustive.
     if len(yetToDl) <= 0 and len(yetToCrawl) <= 0:
         print('Nothing left to crawl or DL. done.')
@@ -317,11 +341,18 @@ def rcrawl():
 
         ##download it
         print('downloading: ' + urldl)
-        out = dlfile(urldl, localfile)
-        dled.append(urldl)
-        dlpos += 1
-        rcrawl() ##this verifies that it won't crawl more until all files in list are downloaded.
-        return
+        ##check mustfinds
+        mustfound = False
+        if settings['mustfind']:
+            for mst in settings['mustffind']:
+                if mst.find('*') > -1 or urdl.find(mst) > -1:
+                    mustfound = True
+        if mustfound == True:
+            out = dlfile(urldl, localfile)
+            dled.append(urldl)
+            dlpos += 1
+            rcrawl() ##this verifies that it won't crawl more until all files in list are downloaded.
+            return
     ##move  on to the crawling instead of downloading,
     if len(yetToCrawl) > 0 and pos < settings['maxc'] and settings['maxc'] != 0:
         urlcrawl = yetToCrawl.pop(0)
@@ -340,6 +371,16 @@ def rcrawl():
                 settings['proxies'] = []##defeat the error
             ##now check if non proxy:
             if len(settings['proxies']) == 0:
+                ##check mustfinds
+                mustfound = False
+                if settings['mustfind']:
+                    for mst in settings['mustfind']:
+                        if mst.find('*') > -1 or urlcrawl.find(mst) > -1:
+                            mustfound = True
+                if mustfound == False:
+                    print('url  not containing mustfinds')
+                    rcrawl()
+                    return
                 req = requests.get(urlcrawl, timeout=30)
 
             ##add item to crawled.
