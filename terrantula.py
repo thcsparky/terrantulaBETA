@@ -344,7 +344,7 @@ def rcrawl():
         ##check mustfinds
         mustfound = False
         if settings['mustfind']:
-            for mst in settings['mustffind']:
+            for mst in settings['mustfind']:
                 if mst.find('*') > -1 or urdl.find(mst) > -1:
                     mustfound = True
         if mustfound == True:
