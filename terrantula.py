@@ -414,42 +414,44 @@ def rcrawl():
         linksfound = []
         if req.ok:
             prfpos = 0
-            for prf in settings['prefix']:
-                try:
-                    srf = settings['suffix'][prfpos]
-                except Exception as e:
-                    print('error with there being a suffix')
-                    print(e)
+            try:
+                for prf in settings['prefix']:
+                    try:
+                        srf = settings['suffix'][prfpos]
+                    except Exception as e:
+                        print('error with there being a suffix')
+                        print(e)
 
-                links1 = req.text.split(prf)
-                for link in links1:
-                    link2 = link.split(srf)[0]
-                    for y in settings['dontscrape']:
-                        if link2.find(y) == -1:
-                            ##check where to put, downloads or scrapes:
-                            #settings['extcrawl'] = list,
-                            #settings['crawldl'] = list;
-                            #process starting of links:
-                            try:
-                                lst = settings['linkstart']
-                            except:
-                                lst = 'Error, must set link start!\n'
-                                return
-                            ##loops for file extensions
-                            for z in settings['extcrawl']:
-                                if link2.endswith(z) and link2.startswith(lst) and link2 not in crawled and link2 not in yetToCrawl and link2 != settings['url']:
-                                    yetToCrawl.append(link2)
-                                    print('found crawl: ' + link2)
+                    links1 = req.text.split(prf)
+                    for link in links1:
+                        link2 = link.split(srf)[0]
+                        for y in settings['dontscrape']:
+                            if link2.find(y) == -1:
+                                ##check where to put, downloads or scrapes:
+                                #settings['extcrawl'] = list,
+                                #settings['crawldl'] = list;
+                                #process starting of links:
+                                try:
+                                    lst = settings['linkstart']
+                                except:
+                                    lst = 'Error, must set link start!\n'
+                                    return
+                                ##loops for file extensions
+                                for z in settings['extcrawl']:
+                                    if link2.endswith(z) and link2.startswith(lst) and link2 not in crawled and link2 not in yetToCrawl and link2 != settings['url']:
+                                        yetToCrawl.append(link2)
+                                        print('found crawl: ' + link2)
 
-                            for z in settings['crawldl']:
-                                if link2.endswith(z) and link2.startswith(lst) and link2 not in dled and link2 not in yetToDl and link2 != settings['url']:
-                                    yetToDl.append(link2)
-                                    print('found dl: ' + link2)
+                                for z in settings['crawldl']:
+                                    if link2.endswith(z) and link2.startswith(lst) and link2 not in dled and link2 not in yetToDl and link2 != settings['url']:
+                                        yetToDl.append(link2)
+                                        print('found dl: ' + link2)
 
-
-
-
-
+            except Exception as e:
+                print('Exception: ')
+                print(e)
+                rcrawl()
+                return
             if len(yetToDl) > 0 or len(yetToCrawl) > 0:
                 pos += 1
                 rcrawl()
