@@ -26,8 +26,6 @@ def processCMD(cmd):
     if cmd.find('help') > -1:
         print('you can: ')
         print('set url (this will be the beginning, starting url)')
-        print('set prefix [here] (this is what the program will look for links to the right of)')
-        print('set suffix [here] (this is what the program will look for links to the left of up until the prefix)')
         print('add/rem/list/clear suffix')
         print('add/rem/list/clear prefix')
         print('load proxies (stored in this directory)')
