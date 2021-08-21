@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 import random
 import os
 settings = {}
@@ -10,7 +11,66 @@ maxdl = 0
 yetToCrawl = []
 yetToDl = []
 crawled = []
+regfound = []
 dled = []
+def saveregex():
+    global regfound
+    global yetToCrawl
+
+    a = input(os.getcwd() + '/')
+    b = open(a, 'w')
+    strout = ""
+    for y in regfound:
+        strout += y + '\n'
+    b.write(strout)
+    b.close()
+
+def regexCrawl():
+    global crawled
+    global dled
+    global settings
+    global regfound
+    global yetToCrawl
+    global pos
+    if pos > settings['maxc']:
+        print("Stopped regex crawling, maximum crawl depth exceeded")
+        return
+
+    psurl = ''
+    if len(yetToCrawl) > 0:
+        psurl = yetToCrawl.pop(0)
+
+    try:
+        req  = requests.get(psurl, timeout=30)
+        if req.ok:
+            txt = req.text
+            reglist = re.findall(settings['regex'], txt)
+            for r in reglist:
+                print('Found: ' + r + ' In: ' + psurl)
+                regfound.append(r)
+
+            i = 0
+            for parse in settings['prefix']:
+                parse2 = settings['suffix'][i]
+                i+= 1
+
+                lnk1 = txt.split(parse)
+                for lnk in lnk1:
+                    for yv in settings['extcrawl']:
+                        urlfound = lnk.split(parse2)[0]
+                        if urlfound.endswith(yv) and urlfound.startswith(settings['linkstart']):
+                            if urlfound not in yetToCrawl and urlfound not in crawled:
+                                yetToCrawl.append(urlfound)
+                                if urlfound not in crawled:
+                                    crawled.append(urlfound)
+            pos += 1
+            regexCrawl()
+            return
+
+    except Exception as e:
+        print(e)
+        regexCrawl()
+        return
 
 def processCMD(cmd):
     global crawled
@@ -21,6 +81,10 @@ def processCMD(cmd):
     global maxdl
     global yetToDl
     global yettocrawl
+
+    if cmd.find('save regex') > -1:
+        a = saveregex()
+        print('Saved regex')
 
 
     if cmd.find('help') > -1:
@@ -47,7 +111,10 @@ def processCMD(cmd):
         print('add mustfind (here) this is a list of strings that must be contained in the url in order to process it, you can add * for everything')
         print('rem mustfind (here)')
         print('show mustfind')
+        print('show regex (shows what regex pattern the "action regex" function wil use)')
+        print('action regex (starts the regex crawler and prints onto screen everything it finds)')
         print('add ext (crawl or dl) .exmpl')
+        print('set regex (this sets the regex value for what to search for in the action regex function)')
         print('rem ext (crawl or dl) here (removes item based on the file extension rather than a number like the other one)')
         print('list ext (crawl or dl) lists ')
         print('save crawled')
@@ -55,6 +122,22 @@ def processCMD(cmd):
         print('back')
         print('exit')
 
+    if cmd.find('show regex') > -1:
+        try:
+            print(settings['regex'])
+        except Exception as e:
+            print(e)
+    if cmd.find('set regex ') > -1:
+        reg = cmd.split('set regex ')[1]
+        settings['regex'] = reg
+
+    if cmd.find('action regex') > -1:
+        pos = 0
+        try:
+            yetToCrawl.append(settings['url'])
+            regexCrawl()
+        except Exception as e:
+            print(e)
     if cmd.find('list proxies') > -1:
         try:
             for x in settigns['proxies']:
