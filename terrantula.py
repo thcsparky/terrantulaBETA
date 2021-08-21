@@ -28,6 +28,8 @@ def processCMD(cmd):
         print('set url (this will be the beginning, starting url)')
         print('set prefix [here] (this is what the program will look for links to the right of)')
         print('set suffix [here] (this is what the program will look for links to the left of up until the prefix)')
+        print('add/rem/list/clear suffix')
+        print('add/rem/list/clear prefix')
         print('load proxies (stored in this directory)')
         print('list proxies')
         print('clear proxies')
@@ -145,6 +147,42 @@ def processCMD(cmd):
                 settings['crawldl'] = []
                 settings['crawldl'].append(sub2cmd)
 
+    if cmd.find('clear prefix') > -1:
+        settings['prefix'] = []
+        print('prefixes cleared')
+    if cmd.find('clear suffix') > -1:
+        settings['suffix'] = []
+        print('suffixes cleared')
+
+    if cmd.find('list prefix') > -1:
+        try:
+            print(settings['prefix'])
+        except Exception as e:
+            print(e)
+
+    if cmd.find('list suffix') > -1:
+        try:
+            print(settings['suffix'])
+        except Exception as e:
+            print(e)
+
+    if cmd.find('add prefix ') > -1:
+        prf = cmd.split('add prefix ')[1]
+        try:
+            settings['prefix'].append(prf)
+        except Exception as e:
+            settings['prefix'] = []
+            settings['prefix'].append(prf)
+
+    if cmd.find('add suffix ') > -1:
+        prf = cmd.split('add suffix ')[1]
+
+        try:
+            settings['suffix'].append(prf)
+        except Exception as e:
+            settings['suffix'] =  []
+            settings['suffix'].append(prf)
+
     if cmd.find('rem ext ') > -1:
         subcmd = cmd.split('rem ext')[1]
         if subcmd.find('crawl ') > -1:
@@ -223,23 +261,6 @@ def processCMD(cmd):
         urly = urly.replace(' ', '')
         settings['url'] = urly
 
-    if cmd.find('set prefix ') > -1:
-        try:
-            prefix = cmd.split('set prefix ')[1]
-            settings['parsers']['prefix'] = prefix
-        except:
-            settings['parsers'] = {}
-            prefix = cmd.split('set prefix ')[1]
-            settings['parsers']['prefix'] = prefix
-
-    if cmd.find('set suffix ') > -1:
-        try:
-            suffix = cmd.split('set suffix ')[1]
-            settings['parsers']['suffix'] = suffix
-        except:
-            settings['parsers'] = {}
-            suffix = cmd.split('set suffix ')[1]
-            settings['parsers']['suffix'] = suffix
 
     if cmd.find('clear dontscrape') > -1:
         d = input('are you sure?\n').rstrip()
@@ -392,30 +413,42 @@ def rcrawl():
 
         linksfound = []
         if req.ok:
-            links1 = req.text.split(settings['parsers']['prefix'])
-            for link in links1:
-                link2 = link.split(settings['parsers']['suffix'])[0]
-                for y in settings['dontscrape']:
-                    if link2.find(y) == -1:
-                        ##check where to put, downloads or scrapes:
-                        #settings['extcrawl'] = list,
-                        #settings['crawldl'] = list;
-                        #process starting of links:
-                        try:
-                            lst = settings['linkstart']
-                        except:
-                            lst = 'Error, must set link start!\n'
-                            return
-                        ##loops for file extensions
-                        for z in settings['extcrawl']:
-                            if link2.endswith(z) and link2.startswith(lst) and link2 not in crawled and link2 not in yetToCrawl and link2 != settings['url']:
-                                yetToCrawl.append(link2)
-                                print('found crawl: ' + link2)
+            prfpos = 0
+            for prf in settings['prefix']:
+                try:
+                    srf = settings['suffix'][prfpos]
+                except Exception as e:
+                    print('error with there being a suffix')
+                    print(e)
 
-                        for z in settings['crawldl']:
-                            if link2.endswith(z) and link2.startswith(lst) and link2 not in dled and link2 not in yetToDl and link2 != settings['url']:
-                                yetToDl.append(link2)
-                                print('found dl: ' + link2)
+                links1 = req.text.split(prf)
+                for link in links1:
+                    link2 = link.split(srf)[0]
+                    for y in settings['dontscrape']:
+                        if link2.find(y) == -1:
+                            ##check where to put, downloads or scrapes:
+                            #settings['extcrawl'] = list,
+                            #settings['crawldl'] = list;
+                            #process starting of links:
+                            try:
+                                lst = settings['linkstart']
+                            except:
+                                lst = 'Error, must set link start!\n'
+                                return
+                            ##loops for file extensions
+                            for z in settings['extcrawl']:
+                                if link2.endswith(z) and link2.startswith(lst) and link2 not in crawled and link2 not in yetToCrawl and link2 != settings['url']:
+                                    yetToCrawl.append(link2)
+                                    print('found crawl: ' + link2)
+
+                            for z in settings['crawldl']:
+                                if link2.endswith(z) and link2.startswith(lst) and link2 not in dled and link2 not in yetToDl and link2 != settings['url']:
+                                    yetToDl.append(link2)
+                                    print('found dl: ' + link2)
+
+
+
+
 
             if len(yetToDl) > 0 or len(yetToCrawl) > 0:
                 pos += 1
