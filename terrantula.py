@@ -364,7 +364,7 @@ def rcrawl():
         mustfound = False
         if settings['mustfind']:
             for mst in settings['mustfind']:
-                if mst.find('*') > -1 or urdl.find(mst) > -1:
+                if mst.find('*') > -1 or urldl.find(mst) > -1:
                     mustfound = True
         if mustfound == True:
             out = dlfile(urldl, localfile)
